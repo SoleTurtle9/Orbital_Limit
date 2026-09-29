@@ -27,6 +27,11 @@ public class ScoreManager : MonoBehaviour
         Debug.Log("Очки: " + score);
     }
 
+    public int GetScore()
+    {
+        return score;
+    }
+
     private void UpdateScoreText()
     {
         scoreText.text = "Score: " + score;

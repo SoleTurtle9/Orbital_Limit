@@ -21,6 +21,8 @@ public class Asteroid : MonoBehaviour
     if (other.CompareTag("Player"))
     {
         Debug.Log("Корабль столкнулся с астероидом!");
+
+        GameManager.Instance.GameOver();
     }
 }
 }
