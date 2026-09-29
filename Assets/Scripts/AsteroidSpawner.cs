@@ -1,33 +1,49 @@
 using UnityEngine;
+public class AsteroidSpawner : MonoBehaviour { [SerializeField] private GameObject asteroidPrefab; [SerializeField] private float spawnInterval = 2f; [SerializeField] private float minSpawnInterval = 0.9f; [SerializeField] private float intervalDecreasePerScore = 0.02f;
+private float spawnTimer;
 
-public class AsteroidSpawner : MonoBehaviour
+private void Start()
 {
-    [SerializeField] private GameObject asteroidPrefab;
-    [SerializeField] private float spawnInterval = 2f;
+    spawnTimer = 1f;
+}
 
-    private void Start()
+private void Update()
+{
+    spawnTimer -= Time.deltaTime;
+
+    if (spawnTimer <= 0f)
     {
-        InvokeRepeating(
-            nameof(SpawnAsteroid),
-            1f,
-            spawnInterval
-        );
+        SpawnAsteroid();
+        spawnTimer = GetCurrentSpawnInterval();
+    }
+}
+
+private float GetCurrentSpawnInterval()
+{
+    float currentInterval = spawnInterval;
+
+    if (ScoreManager.Instance != null)
+    {
+        currentInterval -= ScoreManager.Instance.GetScore() * intervalDecreasePerScore;
     }
 
-    private void SpawnAsteroid()
-    {
-        float randomX = Random.Range(-8f, 8f);
+    return Mathf.Max(currentInterval, minSpawnInterval);
+}
 
-        Vector3 spawnPosition = new Vector3(
-            randomX,
-            6f,
-            0f
-        );
+private void SpawnAsteroid()
+{
+    float randomX = Random.Range(-8f, 8f);
 
-        Instantiate(
-            asteroidPrefab,
-            spawnPosition,
-            Quaternion.identity
-        );
-    }
+    Vector3 spawnPosition = new Vector3(
+        randomX,
+        6f,
+        0f
+    );
+
+    Instantiate(
+        asteroidPrefab,
+        spawnPosition,
+        Quaternion.identity
+    );
+}
 }

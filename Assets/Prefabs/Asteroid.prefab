@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 8903358793539714465}
   - component: {fileID: 5452822079260490401}
   - component: {fileID: 8258320878453763346}
-  - component: {fileID: 643614480091287355}
   - component: {fileID: -1906729409499841725}
+  - component: {fileID: 8757149712937841929}
   m_Layer: 0
   m_Name: Asteroid
   m_TagString: Asteroid
@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: be5647efde4ae4107be585d64b8c17b7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -122,8 +122,24 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!58 &643614480091287355
-CircleCollider2D:
+--- !u!114 &-1906729409499841725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2204569700049917825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae3f8064bc2744a3783950955572f3e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Asteroid
+  speed: 3
+  speedVariation: 1
+  speedIncreasePerScore: 0.1
+  rotationSpeed: 60
+--- !u!68 &8757149712937841929
+EdgeCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -157,17 +173,36 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.5
---- !u!114 &-1906729409499841725
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2204569700049917825}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae3f8064bc2744a3783950955572f3e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Asteroid
-  speed: 3
+  m_EdgeRadius: 0
+  m_Points:
+  - {x: 0.7727168, y: 0.4170535}
+  - {x: 0.84603196, y: 0.3571623}
+  - {x: 0.8720546, y: 0.043547954}
+  - {x: 0.8211394, y: -0.18476416}
+  - {x: 0.7197366, y: -0.28121746}
+  - {x: 0.75920993, y: -0.4324548}
+  - {x: 0.62984675, y: -0.6217954}
+  - {x: 0.4233101, y: -0.68952125}
+  - {x: 0.32647908, y: -0.59349495}
+  - {x: 0.2897802, y: -0.6996965}
+  - {x: 0.08221505, y: -0.6739202}
+  - {x: -0.106859766, y: -0.783404}
+  - {x: -0.25856197, y: -0.6735979}
+  - {x: -0.2898556, y: -0.7670398}
+  - {x: -0.6050237, y: -0.79091144}
+  - {x: -0.7132487, y: -0.63435674}
+  - {x: -0.75421894, y: -0.342224}
+  - {x: -0.88483006, y: -0.09910318}
+  - {x: -0.82724583, y: 0.065875255}
+  - {x: -0.65863115, y: 0.28704077}
+  - {x: -0.40824255, y: 0.65100116}
+  - {x: -0.15065295, y: 0.62824744}
+  - {x: 0.07041943, y: 0.79545724}
+  - {x: 0.3120306, y: 0.7054796}
+  - {x: 0.46969578, y: 0.7858027}
+  - {x: 0.7652079, y: 0.65063405}
+  - {x: 0.7660251, y: 0.41036114}
+  m_AdjacentStartPoint: {x: 0, y: 0}
+  m_AdjacentEndPoint: {x: 0, y: 0}
+  m_UseAdjacentStartPoint: 0
+  m_UseAdjacentEndPoint: 0

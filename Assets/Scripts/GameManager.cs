@@ -21,6 +21,10 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
+        if (AudioManager.Instance != null)
+{
+    AudioManager.Instance.PlayGameOver();
+}
         finalScoreText.text = "Score: " + ScoreManager.Instance.GetScore();
 
         gameOverPanel.SetActive(true);
