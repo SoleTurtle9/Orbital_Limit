@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
+    private const string SfxVolumeKey = "SfxVolume";
+
     public static AudioManager Instance { get; private set; }
 
     [Header("Audio Source")]
@@ -11,6 +13,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip laserSound;
     [SerializeField] private AudioClip hitSound;
     [SerializeField] private AudioClip gameOverSound;
+    [SerializeField] private AudioClip pickupSound;
 
     private void Awake()
     {
@@ -28,6 +31,11 @@ public class AudioManager : MonoBehaviour
         PlaySound(laserSound);
     }
 
+    public void PlayPickupSound()
+    {
+        PlaySound(pickupSound);
+    }
+
     public void PlayHit()
     {
         PlaySound(hitSound);
@@ -43,6 +51,6 @@ public class AudioManager : MonoBehaviour
         if (clip == null || audioSource == null)
             return;
 
-        audioSource.PlayOneShot(clip);
+        audioSource.PlayOneShot(clip, PlayerPrefs.GetFloat(SfxVolumeKey, 1f));
     }
 }

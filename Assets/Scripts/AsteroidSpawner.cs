@@ -4,8 +4,22 @@ public class AsteroidSpawner : MonoBehaviour
 {
     [Header("Asteroid Spawning")]
     [SerializeField] private GameObject asteroidPrefab;
+    [SerializeField] private GameObject heavyAsteroidPrefab;
+    [SerializeField] private GameObject fastAsteroidPrefab;
     [SerializeField] private float spawnInterval = 2f;
     [SerializeField] private float minSpawnInterval = 0.9f;
+
+    [Header("Heavy Asteroid")]
+    [SerializeField] private int heavyAsteroidStartWave = 5;
+    [SerializeField] private float heavyAsteroidChance = 0.12f;
+    [SerializeField] private float heavyAsteroidChanceIncreasePerWave = 0.025f;
+    [SerializeField] private float maxHeavyAsteroidChance = 0.28f;
+
+    [Header("Fast Asteroid")]
+    [SerializeField] private int fastAsteroidStartWave = 3;
+    [SerializeField] private float fastAsteroidChance = 0.14f;
+    [SerializeField] private float fastAsteroidChanceIncreasePerWave = 0.03f;
+    [SerializeField] private float maxFastAsteroidChance = 0.35f;
 
     [Header("Waves")]
     [SerializeField] private float waveDuration = 20f;
@@ -72,10 +86,51 @@ public class AsteroidSpawner : MonoBehaviour
             0f
         );
 
-        Instantiate(
-            asteroidPrefab,
-            spawnPosition,
-            Quaternion.identity
+        Instantiate(ChooseAsteroidPrefab(), spawnPosition, Quaternion.identity);
+    }
+
+    private GameObject ChooseAsteroidPrefab()
+    {
+        float heavyChance = GetAsteroidChance(
+            heavyAsteroidPrefab,
+            heavyAsteroidStartWave,
+            heavyAsteroidChance,
+            heavyAsteroidChanceIncreasePerWave,
+            maxHeavyAsteroidChance
         );
+
+        float fastChance = GetAsteroidChance(
+            fastAsteroidPrefab,
+            fastAsteroidStartWave,
+            fastAsteroidChance,
+            fastAsteroidChanceIncreasePerWave,
+            maxFastAsteroidChance
+        );
+
+        float randomValue = Random.value;
+
+        if (randomValue < heavyChance)
+            return heavyAsteroidPrefab;
+
+        if (randomValue < heavyChance + fastChance)
+            return fastAsteroidPrefab;
+
+        return asteroidPrefab;
+    }
+
+    private float GetAsteroidChance(
+        GameObject prefab,
+        int startWave,
+        float baseChance,
+        float chanceIncreasePerWave,
+        float maxChance
+    )
+    {
+        if (prefab == null || currentWave < startWave)
+            return 0f;
+
+        float waveBonus = (currentWave - startWave) * chanceIncreasePerWave;
+
+        return Mathf.Min(baseChance + waveBonus, maxChance);
     }
 }

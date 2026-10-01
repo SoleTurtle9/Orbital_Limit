@@ -16,12 +16,18 @@ public class ScoreManager : MonoBehaviour
 
     private void Start()
     {
+        ResolveScoreText();
         UpdateScoreText();
     }
 
     public void AddPoint()
     {
-        score++;
+        AddScore(1);
+    }
+
+    public void AddScore(int amount)
+    {
+        score += amount;
         UpdateScoreText();
 
         Debug.Log("Очки: " + score);
@@ -34,6 +40,24 @@ public class ScoreManager : MonoBehaviour
 
     private void UpdateScoreText()
     {
-        scoreText.text = "Score: " + score;
+        if (scoreText == null)
+        {
+            ResolveScoreText();
+        }
+
+        if (scoreText == null)
+            return;
+
+        scoreText.text = "СЧЁТ: " + score;
+    }
+
+    private void ResolveScoreText()
+    {
+        GameObject scoreObject = GameObject.Find("ScoreText");
+
+        if (scoreObject == null)
+            return;
+
+        scoreText = scoreObject.GetComponent<TextMeshProUGUI>();
     }
 }

@@ -33,6 +33,7 @@ public class Bullet : MonoBehaviour
             return;
 
         Vector3 hitPosition = transform.position;
+        Asteroid asteroid = other.GetComponent<Asteroid>();
 
         if (hitEffectPrefab != null)
         {
@@ -42,17 +43,31 @@ public class Bullet : MonoBehaviour
                 Quaternion.identity
             );
         }
-        if (AudioManager.Instance != null)
-{
-    AudioManager.Instance.PlayHit();
-}
 
-        Destroy(other.gameObject);
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayHit();
+        }
+
+        int scoreValue = 1;
+        bool asteroidDestroyed = true;
+
+        if (asteroid != null)
+        {
+            scoreValue = asteroid.ScoreValue;
+            asteroidDestroyed = asteroid.TakeHit();
+        }
+        else
+        {
+            VfxEffects.SpawnAsteroidExplosion(hitPosition);
+            Destroy(other.gameObject);
+        }
+
         Destroy(gameObject);
 
-        if (ScoreManager.Instance != null)
+        if (asteroidDestroyed && ScoreManager.Instance != null)
         {
-            ScoreManager.Instance.AddPoint();
+            ScoreManager.Instance.AddScore(scoreValue);
         }
     }
 }

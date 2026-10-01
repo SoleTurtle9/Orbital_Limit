@@ -6,6 +6,10 @@ public class Asteroid : MonoBehaviour
     [SerializeField] private float speedVariation = 1f;
     [SerializeField] private float speedIncreasePerScore = 0.1f;
 
+    [Header("Durability")]
+    [SerializeField] private int maxHealth = 1;
+    [SerializeField] private int scoreValue = 1;
+
     [Header("Rotation")]
     [SerializeField] private float rotationSpeed = 60f;
 
@@ -14,10 +18,14 @@ public class Asteroid : MonoBehaviour
 
     private float asteroidSpeed;
     private float rotationDirection;
+    private int currentHealth;
     private bool hasHitPlayer;
+
+    public int ScoreValue => scoreValue;
 
     private void Start()
     {
+        currentHealth = maxHealth;
         asteroidSpeed = speed + Random.Range(-speedVariation, speedVariation);
 
         rotationDirection = Random.value < 0.5f ? -1f : 1f;
@@ -54,6 +62,19 @@ public class Asteroid : MonoBehaviour
         }
     }
 
+    public bool TakeHit(int damage = 1)
+    {
+        currentHealth = Mathf.Max(currentHealth - damage, 0);
+
+        if (currentHealth > 0)
+            return false;
+
+        VfxEffects.SpawnAsteroidExplosion(transform.position);
+        Destroy(gameObject);
+
+        return true;
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
@@ -69,6 +90,8 @@ public class Asteroid : MonoBehaviour
             {
                 player.TakeDamage(damage);
             }
+
+            VfxEffects.SpawnAsteroidExplosion(transform.position);
 
             Destroy(gameObject);
         }

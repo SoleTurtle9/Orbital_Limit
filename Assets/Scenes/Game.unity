@@ -964,6 +964,9 @@ MonoBehaviour:
   maxY: 4.5
   laserPrefab: {fileID: 5321432377683460874, guid: 687cb39f575b1485ebe0d16f409235e3, type: 3}
   firePoint: {fileID: 818646254}
+  shootInterval: 0.35
+  boostedShootInterval: 0.12
+  maxHealth: 100
 --- !u!61 &857747443
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1254,6 +1257,7 @@ MonoBehaviour:
   laserSound: {fileID: 8300000, guid: 47ca92dbe81854ce78f53a16c61e72c5, type: 3}
   hitSound: {fileID: 8300000, guid: 25ab5dc96cda543c888952612243b244, type: 3}
   gameOverSound: {fileID: 8300000, guid: 616e5b21d5c53425db8e4000427f6a0b, type: 3}
+  pickupSound: {fileID: 8300000, guid: 4bac80983dba646cb84f88c142e88312, type: 3}
 --- !u!1 &1108886146
 GameObject:
   m_ObjectHideFlags: 0
@@ -1375,7 +1379,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5e947865d6c04e24827d592d4db8370, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
-  scoreText: {fileID: 1681845243}
+  scoreText: {fileID: 0}
 --- !u!4 &1369545808
 Transform:
   m_ObjectHideFlags: 0
@@ -1448,7 +1452,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Score: 0'
+  m_text: "\u041E\u0447\u043A\u0438: 0"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1573,9 +1577,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AsteroidSpawner
   asteroidPrefab: {fileID: 2204569700049917825, guid: 0d4f6c0168ac64ee79fe072623016f4a, type: 3}
+  heavyAsteroidPrefab: {fileID: 7193815041042040001, guid: 3c6b135d7ce849b3b960dd7c06d79bcf, type: 3}
+  fastAsteroidPrefab: {fileID: 6194814074053010001, guid: 4dd5fd6430cc46c9aa26d57e0c1929df, type: 3}
   spawnInterval: 2
   minSpawnInterval: 0.9
-  intervalDecreasePerScore: 0.02
+  heavyAsteroidStartWave: 5
+  heavyAsteroidChance: 0.12
+  heavyAsteroidChanceIncreasePerWave: 0.025
+  maxHeavyAsteroidChance: 0.28
+  fastAsteroidStartWave: 3
+  fastAsteroidChance: 0.14
+  fastAsteroidChanceIncreasePerWave: 0.03
+  maxFastAsteroidChance: 0.35
+  waveDuration: 20
+  intervalDecreasePerWave: 0.1
 --- !u!1 &1748358346
 GameObject:
   m_ObjectHideFlags: 0
@@ -1851,6 +1866,59 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &2073010101
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2073010102}
+  - component: {fileID: 2073010103}
+  m_Layer: 0
+  m_Name: BonusSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2073010102
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2073010101}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2073010103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2073010101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 000e640575a1448339734235bb1e7c7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BonusSpawner
+  healthPickupPrefab: {fileID: 2024241594465014058, guid: c37edffed26b3414181fbf4c6e95f528, type: 3}
+  fireRatePickupPrefab: {fileID: 4445288246852096833, guid: 4a52f8b8af857421ab940c0bd9a4519c, type: 3}
+  minSpawnDelay: 10
+  maxSpawnDelay: 16
+  minX: -8
+  maxX: 8
+  spawnY: 6
+  healthPickupWeight: 1
+  fireRatePickupWeight: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1865,3 +1933,4 @@ SceneRoots:
   - {fileID: 1108886148}
   - {fileID: 1001887918}
   - {fileID: 1106634640}
+  - {fileID: 2073010102}

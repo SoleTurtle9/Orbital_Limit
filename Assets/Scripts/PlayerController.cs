@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     [Header("Shooting")]
     [SerializeField] private GameObject laserPrefab;
     [SerializeField] private Transform firePoint;
+    [SerializeField] private float shootInterval = 0.35f;
+    [SerializeField] private float boostedShootInterval = 0.12f;
 
     [Header("Health")]
     [SerializeField] private int maxHealth = 100;
@@ -25,6 +27,9 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private float rotationInput;
     private float thrustInput;
+    private float shootTimer;
+    private float currentShootInterval;
+    private float fireRateBoostEndTime;
     private int currentHealth;
     private bool isDead;
 
@@ -35,6 +40,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         currentHealth = maxHealth;
+        currentShootInterval = shootInterval;
     }
 
     private void Update()
@@ -45,9 +51,18 @@ public class PlayerController : MonoBehaviour
         thrustInput = Input.GetAxisRaw("Vertical");
         rotationInput = Input.GetAxisRaw("Horizontal");
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        UpdateFireRateBoost();
+        UpdateShooting();
+    }
+
+    private void UpdateShooting()
+    {
+        shootTimer -= Time.deltaTime;
+
+        if (Input.GetKey(KeyCode.Space) && shootTimer <= 0f)
         {
             Shoot();
+            shootTimer = currentShootInterval;
         }
     }
 
@@ -140,6 +155,40 @@ public class PlayerController : MonoBehaviour
         {
             Die();
         }
+    }
+
+    public bool RestoreHealth(int amount)
+    {
+        if (isDead || currentHealth >= maxHealth)
+            return false;
+
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        Debug.Log("Player HP restored: " + currentHealth + "/" + maxHealth);
+
+        return true;
+    }
+
+    public void ActivateFireRateBoost(float duration)
+    {
+        if (isDead)
+            return;
+
+        currentShootInterval = boostedShootInterval;
+        fireRateBoostEndTime = Time.time + duration;
+
+        Debug.Log("Fire rate boost activated for " + duration + " seconds");
+    }
+
+    private void UpdateFireRateBoost()
+    {
+        if (currentShootInterval == shootInterval)
+            return;
+
+        if (Time.time < fireRateBoostEndTime)
+            return;
+
+        currentShootInterval = shootInterval;
+        Debug.Log("Fire rate boost ended");
     }
 
     private void Die()
