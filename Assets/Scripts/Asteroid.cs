@@ -9,8 +9,12 @@ public class Asteroid : MonoBehaviour
     [Header("Rotation")]
     [SerializeField] private float rotationSpeed = 60f;
 
+    [Header("Damage")]
+    [SerializeField] private int damage = 20;
+
     private float asteroidSpeed;
     private float rotationDirection;
+    private bool hasHitPlayer;
 
     private void Start()
     {
@@ -54,7 +58,19 @@ public class Asteroid : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            GameManager.Instance.GameOver();
+            if (hasHitPlayer)
+                return;
+
+            hasHitPlayer = true;
+
+            PlayerController player = other.GetComponent<PlayerController>();
+
+            if (player != null)
+            {
+                player.TakeDamage(damage);
+            }
+
+            Destroy(gameObject);
         }
     }
 }

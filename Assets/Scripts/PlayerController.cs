@@ -19,17 +19,29 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject laserPrefab;
     [SerializeField] private Transform firePoint;
 
+    [Header("Health")]
+    [SerializeField] private int maxHealth = 100;
+
     private Rigidbody2D rb;
     private float rotationInput;
     private float thrustInput;
+    private int currentHealth;
+    private bool isDead;
+
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        currentHealth = maxHealth;
     }
 
     private void Update()
     {
+        if (isDead)
+            return;
+
         thrustInput = Input.GetAxisRaw("Vertical");
         rotationInput = Input.GetAxisRaw("Horizontal");
 
@@ -41,6 +53,9 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (isDead)
+            return;
+
         HandleRotation();
         HandleMovement();
         KeepInsideBounds();
@@ -111,5 +126,31 @@ public class PlayerController : MonoBehaviour
             firePoint.position,
             firePoint.rotation
         );
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (isDead)
+            return;
+
+        currentHealth = Mathf.Max(currentHealth - damage, 0);
+        Debug.Log("Player HP: " + currentHealth + "/" + maxHealth);
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        isDead = true;
+        rb.linearVelocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.GameOver();
+        }
     }
 }

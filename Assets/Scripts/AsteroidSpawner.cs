@@ -1,49 +1,81 @@
 using UnityEngine;
-public class AsteroidSpawner : MonoBehaviour { [SerializeField] private GameObject asteroidPrefab; [SerializeField] private float spawnInterval = 2f; [SerializeField] private float minSpawnInterval = 0.9f; [SerializeField] private float intervalDecreasePerScore = 0.02f;
-private float spawnTimer;
 
-private void Start()
+public class AsteroidSpawner : MonoBehaviour
 {
-    spawnTimer = 1f;
-}
+    [Header("Asteroid Spawning")]
+    [SerializeField] private GameObject asteroidPrefab;
+    [SerializeField] private float spawnInterval = 2f;
+    [SerializeField] private float minSpawnInterval = 0.9f;
 
-private void Update()
-{
-    spawnTimer -= Time.deltaTime;
+    [Header("Waves")]
+    [SerializeField] private float waveDuration = 20f;
+    [SerializeField] private float intervalDecreasePerWave = 0.1f;
 
-    if (spawnTimer <= 0f)
+    private float spawnTimer;
+    private float waveTimer;
+    private int currentWave = 1;
+
+    public int CurrentWave => currentWave;
+
+    private void Start()
     {
-        SpawnAsteroid();
-        spawnTimer = GetCurrentSpawnInterval();
-    }
-}
+        spawnTimer = 1f;
+        waveTimer = waveDuration;
 
-private float GetCurrentSpawnInterval()
-{
-    float currentInterval = spawnInterval;
-
-    if (ScoreManager.Instance != null)
-    {
-        currentInterval -= ScoreManager.Instance.GetScore() * intervalDecreasePerScore;
+        Debug.Log("Wave " + currentWave + " started");
     }
 
-    return Mathf.Max(currentInterval, minSpawnInterval);
-}
+    private void Update()
+    {
+        UpdateWave();
 
-private void SpawnAsteroid()
-{
-    float randomX = Random.Range(-8f, 8f);
+        spawnTimer -= Time.deltaTime;
 
-    Vector3 spawnPosition = new Vector3(
-        randomX,
-        6f,
-        0f
-    );
+        if (spawnTimer <= 0f)
+        {
+            SpawnAsteroid();
+            spawnTimer = GetCurrentSpawnInterval();
+        }
+    }
 
-    Instantiate(
-        asteroidPrefab,
-        spawnPosition,
-        Quaternion.identity
-    );
-}
+    private void UpdateWave()
+    {
+        waveTimer -= Time.deltaTime;
+
+        if (waveTimer > 0f)
+            return;
+
+        currentWave++;
+        waveTimer += waveDuration;
+
+        Debug.Log(
+            "Wave " + currentWave + " started. Spawn interval: " +
+            GetCurrentSpawnInterval().ToString("0.00") + " seconds"
+        );
+    }
+
+    private float GetCurrentSpawnInterval()
+    {
+        float currentInterval = spawnInterval -
+            (currentWave - 1) * intervalDecreasePerWave;
+
+        return Mathf.Max(currentInterval, minSpawnInterval);
+    }
+
+    private void SpawnAsteroid()
+    {
+        float randomX = Random.Range(-8f, 8f);
+
+        Vector3 spawnPosition = new Vector3(
+            randomX,
+            6f,
+            0f
+        );
+
+        Instantiate(
+            asteroidPrefab,
+            spawnPosition,
+            Quaternion.identity
+        );
+    }
 }
