@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace OrbitalLimit.Tests.PlayMode
@@ -23,6 +25,8 @@ namespace OrbitalLimit.Tests.PlayMode
         private Component bonusSpawner;
         private int originalHighScore;
         private bool hadHighScore;
+        private bool hadMusicVolume;
+        private float originalMusicVolume;
         private readonly List<string> fontWarnings = new List<string>();
 
         [OneTimeSetUp]
@@ -30,6 +34,8 @@ namespace OrbitalLimit.Tests.PlayMode
         {
             hadHighScore = PlayerPrefs.HasKey("HighScore");
             originalHighScore = PlayerPrefs.GetInt("HighScore", 0);
+            hadMusicVolume = PlayerPrefs.HasKey("MusicVolume");
+            originalMusicVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
             Application.logMessageReceived += CaptureFontWarnings;
         }
 
@@ -58,7 +64,7 @@ namespace OrbitalLimit.Tests.PlayMode
         public IEnumerator ResetTime()
         {
             Time.timeScale = 1f;
-            Assert.That(fontWarnings, Is.Empty, "The score icon must not request a missing font glyph.");
+            Assert.That(fontWarnings, Is.Empty, "UI must not request missing characters or ellipsis glyphs.");
             yield return null;
         }
 
@@ -68,6 +74,8 @@ namespace OrbitalLimit.Tests.PlayMode
             Application.logMessageReceived -= CaptureFontWarnings;
             if (hadHighScore) PlayerPrefs.SetInt("HighScore", originalHighScore);
             else PlayerPrefs.DeleteKey("HighScore");
+            if (hadMusicVolume) PlayerPrefs.SetFloat("MusicVolume", originalMusicVolume);
+            else PlayerPrefs.DeleteKey("MusicVolume");
             PlayerPrefs.Save();
             Time.timeScale = 1f;
         }
@@ -309,6 +317,114 @@ namespace OrbitalLimit.Tests.PlayMode
                 Assert.That(Field<AudioClip>(audio, clip), Is.Not.Null);
         }
 
+        [Test]
+        public void InterfaceFonts_RenderRussianAndLatinInBothWeights()
+        {
+            TMP_FontAsset regular = Resources.Load<TMP_FontAsset>("Fonts/OrbitalUI");
+            TMP_FontAsset bold = Resources.Load<TMP_FontAsset>("Fonts/OrbitalUI-Bold");
+            Assert.That(regular, Is.Not.Null);
+            Assert.That(bold, Is.Not.Null);
+            Assert.That(regular.atlasPopulationMode, Is.EqualTo(AtlasPopulationMode.Static));
+            Assert.That(bold.atlasPopulationMode, Is.EqualTo(AtlasPopulationMode.Static));
+            const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" +
+                "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя…№—–/:%>";
+            foreach (char value in alphabet)
+            {
+                bool alternative;
+                var normalGlyph = TMP_FontAssetUtilities.GetCharacterFromFontAsset(value, regular, false,
+                    FontStyles.Normal, FontWeight.Regular, out alternative);
+                var boldGlyph = TMP_FontAssetUtilities.GetCharacterFromFontAsset(value, regular, false,
+                    FontStyles.Bold, FontWeight.Bold, out alternative);
+                Assert.That(normalGlyph, Is.Not.Null, "Regular: " + value);
+                Assert.That(boldGlyph, Is.Not.Null, "Bold: " + value);
+                Assert.That(normalGlyph.textAsset, Is.EqualTo(regular));
+                Assert.That(boldGlyph.textAsset, Is.EqualTo(bold));
+            }
+
+            TMP_Text[] labels = Object.FindObjectsByType<TMP_Text>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            Assert.That(labels.Length, Is.GreaterThan(15));
+            foreach (TMP_Text label in labels)
+            {
+                Assert.That(label.font, Is.EqualTo(regular), label.name);
+                label.ForceMeshUpdate(true, true);
+                for (int i = 0; i < label.textInfo.characterCount; i++)
+                {
+                    TMP_CharacterInfo glyph = label.textInfo.characterInfo[i];
+                    if (!glyph.isVisible) continue;
+                    Assert.That(glyph.fontAsset == regular || glyph.fontAsset == bold, Is.True, label.name);
+                }
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator GameMusic_PauseSettingsFreezePlaybackAndResumeAtSamePosition()
+        {
+            AudioSource music = Field<AudioSource>(Find("AudioManager"), "musicSource");
+            Assert.That(music.clip.name, Is.EqualTo("space"));
+            Assert.That(music.loop, Is.True);
+            yield return new WaitForSecondsRealtime(0.2f);
+            Assert.That(music.isPlaying, Is.True);
+            Assert.That(music.timeSamples, Is.GreaterThan(0));
+
+            Component pause = Find("PauseMenuController");
+            Invoke(pause, "PauseGame");
+            int pausedSample = music.timeSamples;
+            yield return new WaitForSecondsRealtime(0.15f);
+            Assert.That(music.isPlaying, Is.False);
+            Assert.That(music.timeSamples, Is.EqualTo(pausedSample));
+            GameObject pauseCard = Field<GameObject>(pause, "pauseCard");
+            pauseCard.transform.Find("SettingsButton").GetComponent<Button>().onClick.Invoke();
+            GameObject settings = Field<GameObject>(pause, "settingsCard");
+            Assert.That(settings.activeInHierarchy, Is.True);
+            Slider slider = settings.GetComponentsInChildren<Slider>().Single(s => s.transform.parent.name == "МУЗЫКАRow");
+            slider.value = 0.42f;
+            Assert.That(music.volume, Is.EqualTo(0.42f).Within(0.001f));
+            Assert.That(music.isPlaying, Is.False);
+            settings.transform.Find("BackButton").GetComponent<Button>().onClick.Invoke();
+            Assert.That(pauseCard.activeInHierarchy, Is.True);
+            pauseCard.transform.Find("ResumeButton").GetComponent<Button>().onClick.Invoke();
+            yield return new WaitForSecondsRealtime(0.15f);
+            Assert.That(Time.timeScale, Is.EqualTo(1f));
+            Assert.That(music.isPlaying, Is.True);
+            Assert.That(music.timeSamples, Is.GreaterThan(pausedSample));
+        }
+
+        [UnityTest]
+        public IEnumerator MenuMusic_SettingsAndStartSwitchTracksWithoutOverlap()
+        {
+            PlayerPrefs.SetFloat("MusicVolume", 0.37f);
+            yield return SceneManager.LoadSceneAsync("Main_menu");
+            yield return null;
+            AudioSource menuMusic = Field<AudioSource>(Find("AudioManager"), "musicSource");
+            menuMusic.mute = true;
+            Assert.That(menuMusic.clip.name, Is.EqualTo("Menu"));
+            Assert.That(menuMusic.loop, Is.True);
+            Assert.That(menuMusic.isPlaying, Is.True);
+            Assert.That(menuMusic.volume, Is.EqualTo(0.37f).Within(0.001f));
+            Component menu = Find("MainMenuController");
+            GameObject menuCard = Field<GameObject>(menu, "menuCard");
+            menuCard.transform.Find("SettingsButton").GetComponent<Button>().onClick.Invoke();
+            GameObject settings = Field<GameObject>(menu, "settingsCard");
+            Assert.That(settings.activeInHierarchy, Is.True);
+            Slider slider = settings.GetComponentsInChildren<Slider>().Single(s => s.transform.parent.name == "МУЗЫКАRow");
+            slider.value = 0.62f;
+            Assert.That(menuMusic.volume, Is.EqualTo(0.62f).Within(0.001f));
+            Assert.That(PlayerPrefs.GetFloat("MusicVolume"), Is.EqualTo(0.62f).Within(0.001f));
+            settings.transform.Find("BackButton").GetComponent<Button>().onClick.Invoke();
+            menuCard.transform.Find("StartButton").GetComponent<Button>().onClick.Invoke();
+            yield return null;
+            yield return null;
+            Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo("Game"));
+            Assert.That(menuMusic == null, Is.True, "Menu music must be destroyed on scene transition.");
+            AudioSource gameMusic = Field<AudioSource>(Find("AudioManager"), "musicSource");
+            gameMusic.mute = true;
+            Assert.That(gameMusic.clip.name, Is.EqualTo("space"));
+            Assert.That(gameMusic.isPlaying, Is.True);
+            Assert.That(gameMusic.volume, Is.EqualTo(0.62f).Within(0.001f));
+            Assert.That(Object.FindObjectsByType<AudioSource>(FindObjectsSortMode.None)
+                .Any(source => source.clip != null && source.clip.name == "Menu"), Is.False);
+        }
+
         private GameObject SpawnPickup(string field)
         {
             GameObject pickup = Object.Instantiate(Field<GameObject>(bonusSpawner, field), PickupPosition(), Quaternion.identity);
@@ -340,7 +456,8 @@ namespace OrbitalLimit.Tests.PlayMode
 
         private void CaptureFontWarnings(string message, string stackTrace, LogType type)
         {
-            if (type == LogType.Warning && message.Contains("ScoreIcon") && message.Contains("2605")) fontWarnings.Add(message);
+            if (type == LogType.Warning && (message.Contains("font asset") || message.Contains("Ellipsis") ||
+                message.Contains("Unicode character"))) fontWarnings.Add(message);
         }
 
         private static Type RuntimeType(string name) { return Type.GetType(name + ", Assembly-CSharp", true); }

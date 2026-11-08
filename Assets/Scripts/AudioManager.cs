@@ -3,11 +3,15 @@ using UnityEngine;
 public class AudioManager : MonoBehaviour
 {
     private const string SfxVolumeKey = "SfxVolume";
+    private const string MusicVolumeKey = "MusicVolume";
 
     public static AudioManager Instance { get; private set; }
 
     [Header("Audio Source")]
     [SerializeField] private AudioSource audioSource;
+
+    [Header("Music")]
+    [SerializeField] private AudioSource musicSource;
 
     [Header("Sounds")]
     [SerializeField] private AudioClip laserSound;
@@ -24,6 +28,31 @@ public class AudioManager : MonoBehaviour
         }
 
         Instance = this;
+        SetMusicVolume(PlayerPrefs.GetFloat(MusicVolumeKey, 1f));
+    }
+
+    public void SetMusicVolume(float volume)
+    {
+        if (musicSource != null)
+        {
+            musicSource.volume = Mathf.Clamp01(volume);
+        }
+    }
+
+    public void PauseMusic()
+    {
+        if (musicSource != null)
+        {
+            musicSource.Pause();
+        }
+    }
+
+    public void ResumeMusic()
+    {
+        if (musicSource != null)
+        {
+            musicSource.UnPause();
+        }
     }
 
     public void PlayLaser()

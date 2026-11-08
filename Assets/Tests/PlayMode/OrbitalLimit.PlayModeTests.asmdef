@@ -1,5 +1,6 @@
 {
     "name": "OrbitalLimit.PlayModeTests",
+    "references": ["Unity.TextMeshPro", "UnityEngine.UI"],
     "optionalUnityReferences": ["TestAssemblies"],
     "autoReferenced": false
 }

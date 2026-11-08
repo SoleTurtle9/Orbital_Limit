@@ -1,0 +1,5 @@
+Source: Unity Searcher package, Editor/Resources/FlatSkin/Font.
+Original font metadata:
+0: Font data copyright Google 2012
+13: Licensed under the Apache License, Version 2.0
+14: http://www.apache.org/licenses/LICENSE-2.0
