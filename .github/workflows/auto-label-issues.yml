@@ -1,0 +1,62 @@
+name: Auto-label player reports
+
+on:
+  issues:
+    types: [opened, edited]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label feedback, bugs and feature requests
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const categories = [
+              { prefix: '[Feedback]', label: 'player-feedback', color: '0E8A16', description: 'Отзывы и оценки игроков' },
+              { prefix: '[Bug]', label: 'bug', color: 'D73A4A', description: 'Ошибки игры' },
+              { prefix: '[Feature]', label: 'enhancement', color: 'A2EEEF', description: 'Предложения по улучшению игры' },
+            ];
+
+            async function processIssue(issue) {
+              if (issue.pull_request) return;
+              const title = (issue.title || '').trim();
+              const category = categories.find(item => title.toLowerCase().startsWith(item.prefix.toLowerCase()));
+              if (!category) return;
+
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: category.label });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                try {
+                  await github.rest.issues.createLabel({
+                    owner, repo, name: category.label,
+                    color: category.color, description: category.description
+                  });
+                } catch (createError) {
+                  if (createError.status !== 422) throw createError;
+                }
+              }
+
+              await github.rest.issues.addLabels({
+                owner, repo, issue_number: issue.number,
+                labels: [category.label]
+              });
+              core.info(`#${issue.number}: ${category.label}`);
+            }
+
+            if (context.eventName === 'issues') {
+              await processIssue(context.payload.issue);
+            } else {
+              // Manual run: apply labels to existing open issues as well.
+              for await (const response of github.paginate.iterator(github.rest.issues.listForRepo, {
+                owner, repo, state: 'open', per_page: 100
+              })) {
+                for (const issue of response.data) await processIssue(issue);
+              }
+            }
