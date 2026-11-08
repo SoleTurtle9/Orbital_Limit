@@ -1,0 +1,50 @@
+name: "🎮 Отзыв о прохождении"
+description: "Поделиться структурированными впечатлениями от игры"
+title: "[Feedback] "
+body:
+  - type: markdown
+    attributes:
+      value: "Расскажите о своём опыте! Для открытого обсуждения с другими игроками используйте Discussions."
+  - type: input
+    id: version
+    attributes:
+      label: Версия игры
+      placeholder: "Например, v0.1.5"
+    validations:
+      required: true
+  - type: dropdown
+    id: rating
+    attributes:
+      label: Общее впечатление
+      options:
+        - "1 — Очень плохо"
+        - "2 — Скорее плохо"
+        - "3 — Нормально"
+        - "4 — Хорошо"
+        - "5 — Отлично"
+    validations:
+      required: true
+  - type: textarea
+    id: liked
+    attributes:
+      label: Что понравилось?
+    validations:
+      required: true
+  - type: textarea
+    id: improve
+    attributes:
+      label: Что стоит улучшить?
+    validations:
+      required: true
+  - type: textarea
+    id: difficulty
+    attributes:
+      label: Как ощущается сложность, управление и темп игры?
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: Другие впечатления
+    validations:
+      required: false
