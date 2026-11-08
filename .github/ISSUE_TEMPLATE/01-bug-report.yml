@@ -1,0 +1,56 @@
+name: "🐛 Ошибка в игре"
+description: "Сообщить об ошибке в Orbital Limit"
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: "Спасибо за помощь в тестировании Orbital Limit! Перед отправкой проверьте существующие Issues."
+  - type: input
+    id: version
+    attributes:
+      label: Версия игры
+      placeholder: "Например, v0.1.5"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Где возникла ошибка?
+      options:
+        - Управление и стрельба
+        - Астероиды и столкновения
+        - Бонусы и здоровье
+        - Волны и сложность
+        - Меню и интерфейс
+        - Музыка и звуки
+        - Запуск и производительность
+        - Другое
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Как воспроизвести?
+      description: "Опишите последовательность действий."
+      placeholder: "1. Запустить игру\n2. Нажать...\n3. Наблюдать..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Что произошло на самом деле?
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Система и дополнительные материалы
+      description: "Версия Windows, разрешение экрана, скриншоты, видео или логи. Не публикуйте личные данные."
+    validations:
+      required: false
