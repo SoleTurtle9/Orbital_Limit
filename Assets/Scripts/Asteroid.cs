@@ -19,7 +19,7 @@ public class Asteroid : MonoBehaviour
     private float asteroidSpeed;
     private float rotationDirection;
     private int currentHealth;
-    private bool hasHitPlayer;
+    private bool isDestroyed;
 
     public int ScoreValue => scoreValue;
 
@@ -35,6 +35,9 @@ public class Asteroid : MonoBehaviour
 
     private void Update()
     {
+        if (isDestroyed)
+            return;
+
         float currentSpeed = asteroidSpeed;
 
         if (ScoreManager.Instance != null)
@@ -58,31 +61,32 @@ public class Asteroid : MonoBehaviour
         // Удаление за пределами экрана
         if (transform.position.y < -7f)
         {
+            isDestroyed = true;
             Destroy(gameObject);
         }
     }
 
     public bool TakeHit(int damage = 1)
     {
+        if (isDestroyed)
+            return false;
+
         currentHealth = Mathf.Max(currentHealth - damage, 0);
 
         if (currentHealth > 0)
             return false;
 
-        VfxEffects.SpawnAsteroidExplosion(transform.position);
-        Destroy(gameObject);
+        isDestroyed = true;
+        DestroyAsteroid();
 
         return true;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player"))
+        if (!isDestroyed && other.CompareTag("Player"))
         {
-            if (hasHitPlayer)
-                return;
-
-            hasHitPlayer = true;
+            isDestroyed = true;
 
             PlayerController player = other.GetComponent<PlayerController>();
 
@@ -91,9 +95,18 @@ public class Asteroid : MonoBehaviour
                 player.TakeDamage(damage);
             }
 
-            VfxEffects.SpawnAsteroidExplosion(transform.position);
-
-            Destroy(gameObject);
+            DestroyAsteroid();
         }
+    }
+
+    private void DestroyAsteroid()
+    {
+        foreach (Collider2D asteroidCollider in GetComponents<Collider2D>())
+        {
+            asteroidCollider.enabled = false;
+        }
+
+        VfxEffects.SpawnAsteroidExplosion(transform.position);
+        Destroy(gameObject);
     }
 }

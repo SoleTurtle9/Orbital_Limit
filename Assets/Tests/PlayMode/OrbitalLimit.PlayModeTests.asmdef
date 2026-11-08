@@ -1,0 +1,5 @@
+{
+    "name": "OrbitalLimit.PlayModeTests",
+    "optionalUnityReferences": ["TestAssemblies"],
+    "autoReferenced": false
+}

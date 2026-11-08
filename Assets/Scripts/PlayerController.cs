@@ -36,6 +36,9 @@ public class PlayerController : MonoBehaviour
     public int CurrentHealth => currentHealth;
     public int MaxHealth => maxHealth;
 
+    private bool CanShoot => !isDead && Time.timeScale > 0f &&
+        (GameManager.Instance == null || !GameManager.Instance.IsGameOver);
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -57,6 +60,9 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateShooting()
     {
+        if (!CanShoot)
+            return;
+
         shootTimer -= Time.deltaTime;
 
         if (Input.GetKey(KeyCode.Space) && shootTimer <= 0f)
@@ -136,11 +142,20 @@ public class PlayerController : MonoBehaviour
 
     private void Shoot()
     {
-        Instantiate(
+        if (!CanShoot)
+            return;
+
+        GameObject laser = Instantiate(
             laserPrefab,
             firePoint.position,
             firePoint.rotation
         );
+
+        Bullet bullet = laser.GetComponent<Bullet>();
+        if (bullet != null)
+        {
+            bullet.IgnoreOwnerCollisions(gameObject);
+        }
     }
 
     public void TakeDamage(int damage)

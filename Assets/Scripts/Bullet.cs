@@ -9,6 +9,30 @@ public class Bullet : MonoBehaviour
     [Header("Hit Effect")]
     [SerializeField] private GameObject hitEffectPrefab;
 
+    private bool hasHit;
+
+    private void Awake()
+    {
+        // Projectiles detect hits without pushing the ship or other rigid bodies.
+        foreach (Collider2D bulletCollider in GetComponentsInChildren<Collider2D>())
+        {
+            bulletCollider.isTrigger = true;
+        }
+    }
+
+    public void IgnoreOwnerCollisions(GameObject owner)
+    {
+        Collider2D[] bulletColliders = GetComponentsInChildren<Collider2D>();
+        Collider2D[] ownerColliders = owner.GetComponentsInChildren<Collider2D>();
+        foreach (Collider2D bulletCollider in bulletColliders)
+        {
+            foreach (Collider2D ownerCollider in ownerColliders)
+            {
+                Physics2D.IgnoreCollision(bulletCollider, ownerCollider);
+            }
+        }
+    }
+
     private void Start()
 {
     if (AudioManager.Instance != null)
@@ -29,8 +53,14 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Asteroid"))
+        if (hasHit || !other.CompareTag("Asteroid"))
             return;
+
+        hasHit = true;
+        foreach (Collider2D bulletCollider in GetComponentsInChildren<Collider2D>())
+        {
+            bulletCollider.enabled = false;
+        }
 
         Vector3 hitPosition = transform.position;
         Asteroid asteroid = other.GetComponent<Asteroid>();

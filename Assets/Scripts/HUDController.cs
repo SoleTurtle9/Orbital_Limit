@@ -21,6 +21,7 @@ public class HUDController : MonoBehaviour
     private Image healthFill;
     private int displayedWave = -1;
     private Coroutine notificationRoutine;
+    private RectTransform hudRoot;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void RegisterSceneLoaded()
@@ -78,12 +79,37 @@ public class HUDController : MonoBehaviour
             return;
         }
 
-        SetupScoreText(canvas);
-        CreateWaveText(canvas.transform);
-        CreateHealthPanel(canvas.transform);
-        CreateNotificationPanel(canvas.transform);
+        GameObject root = new GameObject("GameplayHUD", typeof(RectTransform));
+        hudRoot = root.GetComponent<RectTransform>();
+        hudRoot.SetParent(canvas.transform, false);
+        hudRoot.anchorMin = Vector2.zero;
+        hudRoot.anchorMax = Vector2.one;
+        hudRoot.offsetMin = Vector2.zero;
+        hudRoot.offsetMax = Vector2.zero;
+
+        SetupScoreText(hudRoot);
+        CreateWaveText(hudRoot);
+        CreateHealthPanel(hudRoot);
+        CreateNotificationPanel(hudRoot);
         UpdateHealthUI();
         UpdateWaveUI();
+
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
+        {
+            Hide();
+        }
+    }
+
+    public void Hide()
+    {
+        StopAllCoroutines();
+        notificationRoutine = null;
+        if (hudRoot != null)
+        {
+            hudRoot.gameObject.SetActive(false);
+        }
+
+        gameObject.SetActive(false);
     }
 
     private void Update()
@@ -92,7 +118,7 @@ public class HUDController : MonoBehaviour
         UpdateWaveUI();
     }
 
-    private void SetupScoreText(Canvas canvas)
+    private void SetupScoreText(Transform parent)
     {
         GameObject scoreObject = GameObject.Find("ScoreText");
 
@@ -106,7 +132,7 @@ public class HUDController : MonoBehaviour
 
         GameObject panel = CreateHudPanel(
             "ScorePanel",
-            canvas.transform,
+            parent,
             new Vector2(1f, 1f),
             new Vector2(1f, 1f),
             new Vector2(1f, 1f),
@@ -114,14 +140,7 @@ public class HUDController : MonoBehaviour
             new Vector2(420f, 86f)
         );
 
-        TextMeshProUGUI trophy = CreatePanelIcon(
-            "ScoreIcon",
-            panel.transform,
-            "★",
-            new Color(1f, 0.73f, 0.1f),
-            new Vector2(54f, 0f)
-        );
-        trophy.fontSize = 48f;
+        CreateScoreIcon(panel.transform);
 
         RectTransform scoreRect = scoreObject.GetComponent<RectTransform>();
 
@@ -138,6 +157,24 @@ public class HUDController : MonoBehaviour
         scoreText.color = new Color(0.88f, 0.95f, 1f);
 
         AddTextShadow(scoreObject);
+    }
+
+    private void CreateScoreIcon(Transform parent)
+    {
+        GameObject iconObject = new GameObject("ScoreIcon", typeof(RectTransform));
+        iconObject.transform.SetParent(parent, false);
+
+        RectTransform rect = iconObject.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0f, 0.5f);
+        rect.anchorMax = new Vector2(0f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = new Vector2(54f, 0f);
+        rect.sizeDelta = new Vector2(48f, 48f);
+
+        ScoreIconGraphic icon = iconObject.AddComponent<ScoreIconGraphic>();
+        icon.color = new Color(1f, 0.73f, 0.1f);
+        icon.raycastTarget = false;
+        AddTextShadow(iconObject);
     }
 
     private void CreateWaveText(Transform canvasTransform)
@@ -284,10 +321,7 @@ public class HUDController : MonoBehaviour
 
         Image fill = fillObject.AddComponent<Image>();
         fill.color = new Color(0.28f, 0.9f, 0.5f);
-        fill.type = Image.Type.Filled;
-        fill.fillMethod = Image.FillMethod.Horizontal;
-        fill.fillOrigin = (int)Image.OriginHorizontal.Left;
-        fill.fillAmount = 1f;
+        fill.raycastTarget = false;
 
         return fill;
     }
@@ -335,7 +369,7 @@ public class HUDController : MonoBehaviour
 
     public void ShowBonusNotification(string message)
     {
-        if (notificationText == null || notificationGroup == null)
+        if (!isActiveAndEnabled || notificationText == null || notificationGroup == null)
             return;
 
         if (notificationRoutine != null)
@@ -382,7 +416,7 @@ public class HUDController : MonoBehaviour
         float healthPercent = maxHealth > 0 ? (float)currentHealth / maxHealth : 0f;
 
         healthValueText.text = "Здоровье: " + currentHealth + " / " + maxHealth;
-        healthFill.fillAmount = healthPercent;
+        healthFill.rectTransform.anchorMax = new Vector2(healthPercent, 1f);
         healthFill.color = GetHealthColor(healthPercent);
 
         if (heartText != null)

@@ -7,6 +7,8 @@ public class FireRatePickup : MonoBehaviour
     [SerializeField] private float rotationSpeed = 120f;
     [SerializeField] private float destroyY = -7f;
 
+    private bool collected;
+
     private void Update()
     {
         transform.Translate(Vector2.down * fallSpeed * Time.deltaTime, Space.World);
@@ -20,13 +22,19 @@ public class FireRatePickup : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player"))
+        if (collected || !other.CompareTag("Player"))
             return;
 
         PlayerController player = other.GetComponent<PlayerController>();
 
         if (player == null)
             return;
+
+        collected = true;
+        foreach (Collider2D pickupCollider in GetComponents<Collider2D>())
+        {
+            pickupCollider.enabled = false;
+        }
 
         player.ActivateFireRateBoost(boostDuration);
 

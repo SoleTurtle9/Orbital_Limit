@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour
 
         if (hud != null)
         {
-            hud.gameObject.SetActive(false);
+            hud.Hide();
         }
 
         int score = ScoreManager.Instance.GetScore();
@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviour
 
         finalScoreText.text = "Счёт: " + score + "\nРекорд: " + bestScore;
 
+        gameOverPanel.transform.SetAsLastSibling();
         gameOverPanel.SetActive(true);
 
         Time.timeScale = 0f;
