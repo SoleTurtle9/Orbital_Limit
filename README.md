@@ -1,5 +1,9 @@
 # 🚀 Orbital Limit
 
+[![Оставить отзыв об игре](https://img.shields.io/badge/🎮_Оставить_отзыв-2ea44f?style=for-the-badge)](https://github.com/SoleTurtle9/Orbital_Limit/issues/new/choose)
+
+**Обратная связь:** [сообщить об ошибке или предложить улучшение](https://github.com/SoleTurtle9/Orbital_Limit/issues/new/choose) · [обсуждения игроков](https://github.com/SoleTurtle9/Orbital_Limit/discussions) · [как оставить отзыв](Docs/PLAYER_FEEDBACK.md)
+
 **Orbital Limit** — небольшая 2D космическая игра, разработанная на Unity.
 
 Игрок управляет космическим кораблём, уничтожает астероиды, набирает очки, следит за запасом здоровья и старается продержаться как можно дольше в условиях постоянно растущей сложности.
