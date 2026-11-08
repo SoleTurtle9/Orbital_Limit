@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: "💬 Обсуждения Orbital Limit"
+    url: "https://github.com/SoleTurtle9/Orbital_Limit/discussions"
+    about: "Свободные отзывы, вопросы и обсуждение идей (доступно после включения Discussions в настройках репозитория)."
