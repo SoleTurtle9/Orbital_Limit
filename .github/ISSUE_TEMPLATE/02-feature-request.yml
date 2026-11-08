@@ -1,0 +1,39 @@
+name: "💡 Предложение по игре"
+description: "Предложить улучшение или новую механику"
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: "Спасибо за идею! Для свободного обсуждения также можно использовать Discussions."
+  - type: dropdown
+    id: area
+    attributes:
+      label: Область улучшения
+      options:
+        - Управление и стрельба
+        - Враги и астероиды
+        - Бонусы и баланс
+        - Волны и прогрессия
+        - Интерфейс и доступность
+        - Звук и визуальные эффекты
+        - Другое
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую проблему решает предложение?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Предлагаемое решение
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативы или примеры
+    validations:
+      required: false
